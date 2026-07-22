@@ -1,0 +1,540 @@
+/* styles.css
+   Panel inyectado por la extensión "Grupos para Meet".
+   Todo va prefijado con #gpm- / .gpm- para no chocar con las clases
+   (ofuscadas y cambiantes) de Google Meet. */
+
+#gpm-panel {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  width: 320px;
+  max-height: 82vh;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.24), 0 1px 4px rgba(0, 0, 0, 0.12);
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #202124;
+  font-size: 13px;
+}
+
+#gpm-panel.gpm-collapsed .gpm-body {
+  display: none;
+}
+
+.gpm-hidden {
+  display: none !important;
+}
+
+.gpm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #1a73e8;
+  color: #fff;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.gpm-header.gpm-dragging {
+  cursor: grabbing;
+}
+
+.gpm-header h2 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.gpm-header .gpm-toggle {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.gpm-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gpm-lang-btn {
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: transparent;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 2px 7px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.gpm-lang-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+#gpm-panel.gpm-collapsed .gpm-toggle {
+  transform: rotate(-90deg);
+}
+
+.gpm-body {
+  padding: 12px 14px;
+  overflow-y: auto;
+}
+
+.gpm-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5f6368;
+  margin: 14px 0 6px;
+}
+
+.gpm-section-title:first-child {
+  margin-top: 0;
+}
+
+/* Selector de curso activo, arriba del todo del panel */
+.gpm-course-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.gpm-course-select {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-size: 12.5px;
+  font-family: inherit;
+  color: #202124;
+  background: #fff;
+  cursor: pointer;
+}
+
+.gpm-icon-btn {
+  flex: 0 0 auto;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  background: #fff;
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gpm-icon-btn:hover {
+  background: #f1f3f4;
+}
+
+.gpm-section-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0 10px;
+}
+
+.gpm-link-btn {
+  border: none;
+  background: transparent;
+  color: #1a73e8;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.gpm-link-btn:hover {
+  text-decoration: underline;
+}
+
+.gpm-undo-btn {
+  display: block;
+  margin: 6px 0 0;
+  text-align: left;
+}
+
+/* Lista de equipos con checkbox */
+.gpm-team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.gpm-team-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #f1f3f4;
+}
+
+.gpm-team-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #1a73e8;
+  cursor: pointer;
+}
+
+.gpm-team-item label {
+  flex: 1;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gpm-team-item .gpm-count {
+  font-size: 11px;
+  color: #5f6368;
+  background: #fff;
+  border-radius: 10px;
+  padding: 1px 7px;
+}
+
+.gpm-team-item .gpm-delete {
+  border: none;
+  background: transparent;
+  color: #d93025;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+.gpm-empty-hint {
+  font-size: 12px;
+  color: #5f6368;
+  padding: 10px 0;
+}
+
+.gpm-hint {
+  font-size: 11px;
+  color: #80868b;
+  margin: 4px 0 10px;
+  line-height: 1.4;
+}
+
+.gpm-hint-spaced {
+  margin: 8px 0 10px;
+}
+
+/* Botones */
+.gpm-btn {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.gpm-btn-primary {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.gpm-btn-primary:hover {
+  background: #1765cc;
+}
+
+.gpm-btn-secondary {
+  background: #fff;
+  color: #1a73e8;
+  border: 1px solid #dadce0;
+}
+
+.gpm-btn-secondary:hover {
+  background: #f1f3f4;
+}
+
+.gpm-btn-danger {
+  background: #d93025;
+  color: #fff;
+}
+
+.gpm-btn-danger:hover {
+  background: #c5221f;
+}
+
+.gpm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gpm-status {
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  display: none;
+}
+
+.gpm-status.gpm-visible {
+  display: block;
+}
+
+.gpm-status.gpm-info {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.gpm-status.gpm-error {
+  background: #fce8e6;
+  color: #c5221f;
+}
+
+.gpm-status.gpm-success {
+  background: #e6f4ea;
+  color: #137333;
+}
+
+/* Indicador de progreso durante la asignación */
+.gpm-progress {
+  margin-top: 10px;
+}
+
+.gpm-progress-track {
+  height: 6px;
+  border-radius: 4px;
+  background: #e8eaed;
+  overflow: hidden;
+}
+
+.gpm-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #1a73e8;
+  transition: width 0.2s ease;
+}
+
+.gpm-progress-text {
+  font-size: 11px;
+  color: #5f6368;
+  margin-top: 4px;
+}
+
+/* Cheat sheet: detalle de la última distribución, plegable en el panel */
+#gpm-cheatsheet {
+  margin-top: 10px;
+}
+
+.gpm-cheatsheet-outer,
+.gpm-cs-team {
+  border-radius: 8px;
+}
+
+.gpm-cheatsheet-outer {
+  background: #f8f9fa;
+  padding: 2px 8px;
+}
+
+.gpm-cheatsheet-outer > summary {
+  padding: 8px 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #202124;
+  cursor: pointer;
+  list-style: none;
+}
+
+.gpm-cheatsheet-outer > summary::-webkit-details-marker {
+  display: none;
+}
+
+.gpm-cheatsheet-outer > summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 6px;
+  transition: transform 0.15s ease;
+}
+
+.gpm-cheatsheet-outer[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.gpm-cheatsheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.gpm-cs-team {
+  background: #fff;
+  border: 1px solid #e8eaed;
+  padding: 6px 8px;
+}
+
+.gpm-cs-team > summary {
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+}
+
+.gpm-cs-team > summary::-webkit-details-marker {
+  display: none;
+}
+
+.gpm-cs-team-name {
+  color: #5f6368;
+  font-weight: 400;
+}
+
+.gpm-cs-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11.5px;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.gpm-cs-tag {
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.gpm-cs-ok .gpm-cs-tag {
+  color: #137333;
+}
+
+.gpm-cs-fail .gpm-cs-tag {
+  color: #c5221f;
+}
+
+.gpm-cs-warn .gpm-cs-tag {
+  color: #b06000;
+}
+
+.gpm-cs-muted .gpm-cs-tag {
+  color: #80868b;
+}
+
+/* Sección donación */
+.gpm-donate {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.gpm-donate p {
+  font-size: 11.5px;
+  color: #5f6368;
+  margin: 0 0 8px;
+}
+
+.gpm-coffee-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffdd00;
+  color: #202124;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.gpm-coffee-btn:hover {
+  background: #f5d400;
+}
+
+/* Botón flotante para reabrir el panel si lo minimizan del todo */
+#gpm-reopen-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999999;
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  display: none;
+}
+
+/* Modal de confirmación (reemplaza el confirm() nativo del navegador) */
+.gpm-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+}
+
+.gpm-confirm-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  width: 260px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+}
+
+.gpm-confirm-box p {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #202124;
+  line-height: 1.4;
+}
+
+.gpm-prompt-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  margin: 0 0 16px;
+}
+
+.gpm-prompt-input:focus {
+  outline: none;
+  border-color: #1a73e8;
+}
+
+.gpm-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.gpm-confirm-actions .gpm-btn {
+  width: auto;
+  flex: 1;
+}

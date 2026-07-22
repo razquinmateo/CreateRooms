@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Grupos para Meet - Salas de trabajo",
+  "version": "1.0.0",
+  "description": "Organiza y asigna automáticamente a tus alumnos en las salas de grupos de trabajo de Google Meet, a partir de listas guardadas.",
+  "icons": {
+    "16": "favicon.png",
+    "48": "favicon.png",
+    "128": "favicon.png"
+  },
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["https://meet.google.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://meet.google.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
