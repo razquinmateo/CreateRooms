@@ -98,6 +98,19 @@ la lista de equipos) el docente puede:
   Antes de reemplazar, pide confirmación y guarda un backup de lo anterior
   (mismo mecanismo que "Guardar estos grupos").
 
+### 5. Cambiar el idioma del panel
+
+El botón **🌐** en el header del panel alterna entre español e inglés. La
+primera vez que se abre el panel, el idioma se detecta automáticamente a
+partir del idioma del navegador (`navigator.language`); si el docente lo
+cambia a mano, esa elección queda guardada (clave `gpm_idioma`) y se respeta
+en adelante, sin volver a autodetectar.
+
+Todo lo que ve el docente (botones, mensajes de estado, el cheat sheet, los
+modales de confirmación) pasa por este sistema. Los `console.log` /
+`console.warn` de debug quedan siempre en español — son para quien mantiene
+el código, no para el docente.
+
 ## Estructura de archivos
 
 ```
@@ -167,6 +180,11 @@ para el botón "↩️ Deshacer última sobrescritura".
 Clave `gpm_panel_position`: recuerda dónde quedó posicionado el panel
 (se puede arrastrar tomándolo del header) para no reacomodarlo cada reunión.
 
+Clave `gpm_idioma`: `"es"` o `"en"`. Sólo existe después de que el docente
+toca el botón 🌐 por primera vez — hasta entonces, el idioma se detecta desde
+`navigator.language` en cada carga sin persistirlo, para no "pisar" con un
+valor autodetectado una eventual elección manual futura.
+
 ### Migración desde versiones anteriores (sin multi-curso)
 
 Versiones previas guardaban todo bajo una única clave `curso_actual` (sin
@@ -235,6 +253,14 @@ equipos como al detectar quién está presente para reaplicarlos.
   "Guardar" en azul para confirmar el guardado desde Meet).
 - **Nombrar cursos usa un modal propio** (`showPrompt()`), mismo criterio
   que `showConfirm()`, en vez de `prompt()` nativo.
+- **Idioma del panel: diccionario propio (`STRINGS` + `t()`) en vez de
+  `chrome.i18n`.** La API nativa de Chrome exige archivos
+  `_locales/<idioma>/messages.json` separados del código y sigue el idioma
+  configurado en el navegador sin dar lugar a un toggle manual fácil. Acá se
+  prefirió un objeto `STRINGS = { es: {...}, en: {...} }` con una función
+  `t(clave, ...args)` en el mismo `content.js`: permite el botón 🌐 de
+  cambio manual además de la detección automática, y no fragmenta los textos
+  en archivos aparte dado que el proyecto no tiene build step.
 - **El progreso y el detalle de la última distribución viven en el panel**,
   no sólo en la consola (F12) — la mayoría de los docentes no abre
   DevTools. La consola sigue recibiendo los mismos logs, por si sirven para
