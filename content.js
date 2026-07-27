@@ -26,7 +26,11 @@
   const COURSES_KEY = "gpm_cursos";
   const ACTIVE_COURSE_KEY = "gpm_curso_activo";
   const POSITION_KEY = "gpm_panel_position";
+  const COLLAPSED_KEY = "gpm_panel_colapsado";
   const COFFEE_LINK = "https://www.paypal.com/paypalme/MateoRazquin";
+  // Desactivado temporalmente para la prueba con el profesor invitado a
+  // testear — poné esto en `true` para reactivar la sección de donación.
+  const SHOW_DONATE_SECTION = false;
 
   // Palabras clave (normalizadas, sin tildes) para ubicar botones/menuítems
   // por texto visible o aria-label, en vez de depender de un selector CSS
@@ -67,10 +71,18 @@
 
   const LANG_KEY = "gpm_idioma";
 
+  // Banderas como SVG inline (no como archivos): a este tamaño no aportan
+  // detalle extra y así evitamos sumar web_accessible_resources al manifest
+  // o depender de que un archivo cargue bien. Simplificadas a propósito
+  // (la bandera de EEUU no lleva estrellas, ilegibles a 20px de ancho).
+  const FLAG_ES_SVG =
+    '<svg viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="14" fill="#AA151B"/><rect y="3.5" width="20" height="7" fill="#F1BF00"/></svg>';
+  const FLAG_US_SVG =
+    '<svg viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="14" fill="#B22234"/><g fill="#fff"><rect y="2" width="20" height="1.1"/><rect y="4.2" width="20" height="1.1"/><rect y="6.4" width="20" height="1.1"/><rect y="8.6" width="20" height="1.1"/><rect y="10.8" width="20" height="1.1"/><rect y="13" width="20" height="1.1"/></g><rect width="9" height="7.5" fill="#3C3B6E"/></svg>';
+
   const STRINGS = {
     es: {
       panelTitle: "Grupos para Meet",
-      langToggleTitle: "Idioma / Language",
       courseAddTitle: "Nuevo curso",
       courseRenameTitle: "Renombrar curso",
       courseDeleteTitle: "Eliminar curso",
@@ -165,7 +177,6 @@
     },
     en: {
       panelTitle: "Groups for Meet",
-      langToggleTitle: "Idioma / Language",
       courseAddTitle: "New course",
       courseRenameTitle: "Rename course",
       courseDeleteTitle: "Delete course",
@@ -305,17 +316,18 @@
     currentLang = stored === "en" || stored === "es" ? stored : detectDefaultLang();
   }
 
-  /** Cambia el idioma del panel y lo reconstruye de cero (todo el HTML del
-   *  panel sale de panelHTML(), que usa t() en cada string, así que la
-   *  forma más simple y confiable de aplicar el cambio es reinyectar en
-   *  vez de parchear nodo por nodo). */
-  async function handleToggleLang() {
-    currentLang = currentLang === "es" ? "en" : "es";
+  /** Cambia el idioma del panel (si ya es el idioma activo, no hace nada) y
+   *  lo reconstruye de cero: todo el HTML del panel sale de panelHTML(),
+   *  que usa t() en cada string, así que reinyectar es más simple y
+   *  confiable que parchear nodo por nodo. */
+  async function handleSetLang(lang) {
+    if (lang === currentLang) return;
+    currentLang = lang;
     await saveStoredLang(currentLang);
 
     // #gpm-panel, #gpm-reopen-btn y los overlays son hermanos dentro de un
     // <div> contenedor anónimo que injectPanel() crea; removerlo entero
-    // evita dejar un div vacío huérfano en el body en cada toggle.
+    // evita dejar un div vacío huérfano en el body en cada cambio.
     document.getElementById("gpm-panel")?.parentElement?.remove();
 
     await injectPanel();
@@ -612,6 +624,34 @@
     }
   }
 
+  /** El panel arranca expandido la primera vez (para que el docente vea qué
+   *  hay), pero si lo colapsa a mano esa preferencia se recuerda entre
+   *  sesiones — la idea es usarlo activamente sólo al armar/reaplicar
+   *  equipos, y dejarlo minimizado el resto del tiempo sin que vuelva a
+   *  abrirse solo en cada clase. */
+  function getPanelCollapsed() {
+    return new Promise((resolve) => {
+      if (!isExtensionContextValid()) return resolve(false);
+      try {
+        chrome.storage.local.get([COLLAPSED_KEY], (result) => {
+          if (chrome.runtime.lastError) return resolve(false);
+          resolve(!!result[COLLAPSED_KEY]);
+        });
+      } catch {
+        resolve(false);
+      }
+    });
+  }
+
+  function savePanelCollapsed(collapsed) {
+    if (!isExtensionContextValid()) return;
+    try {
+      chrome.storage.local.set({ [COLLAPSED_KEY]: collapsed });
+    } catch {
+      /* contexto invalidado: se ignora, no rompe la UI */
+    }
+  }
+
   function uid() {
     return "g_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
   }
@@ -631,9 +671,14 @@
         <div class="gpm-header" id="gpm-header">
           <h2>${t("panelTitle")}</h2>
           <div class="gpm-header-actions">
-            <button type="button" class="gpm-lang-btn" id="gpm-lang-toggle" title="${t(
-              "langToggleTitle"
-            )}">${currentLang === "es" ? "EN" : "ES"}</button>
+            <div class="gpm-lang-switch">
+              <button type="button" class="gpm-lang-flag${
+                currentLang === "es" ? " gpm-lang-active" : ""
+              }" id="gpm-lang-es" title="Español" aria-label="Español">${FLAG_ES_SVG}</button>
+              <button type="button" class="gpm-lang-flag${
+                currentLang === "en" ? " gpm-lang-active" : ""
+              }" id="gpm-lang-en" title="English" aria-label="English">${FLAG_US_SVG}</button>
+            </div>
             <span class="gpm-toggle">▾</span>
           </div>
         </div>
@@ -672,10 +717,14 @@
 
           <div id="gpm-cheatsheet"></div>
 
-          <div class="gpm-donate">
+          ${
+            SHOW_DONATE_SECTION
+              ? `<div class="gpm-donate">
             <p>${t("donateQuestion")}</p>
             <button class="gpm-coffee-btn" id="gpm-coffee">${t("donateBtn")}</button>
-          </div>
+          </div>`
+              : ""
+          }
         </div>
       </div>
       <button id="gpm-reopen-btn">${t("reopenBtn")}</button>
@@ -1127,6 +1176,7 @@
 
       if (!moved) {
         panel.classList.toggle("gpm-collapsed");
+        savePanelCollapsed(panel.classList.contains("gpm-collapsed"));
       } else {
         savePanelPosition(panel.style.left, panel.style.top);
       }
@@ -1150,19 +1200,28 @@
       panel.style.right = "auto";
     }
 
+    const savedCollapsed = await getPanelCollapsed();
+    if (savedCollapsed) panel.classList.add("gpm-collapsed");
+
     makeDraggable(panel, header);
 
-    const langBtn = document.getElementById("gpm-lang-toggle");
-    if (langBtn) {
+    const langEsBtn = document.getElementById("gpm-lang-es");
+    const langEnBtn = document.getElementById("gpm-lang-en");
+    [langEsBtn, langEnBtn].forEach((btn) => {
+      if (!btn) return;
       // El header entero es la zona de arrastre (pointerdown la escucha
-      // makeDraggable); sin esto, tocar el botón de idioma movería el panel
-      // en vez de cambiar el idioma.
-      langBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
-      langBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        handleToggleLang();
-      });
-    }
+      // makeDraggable); sin esto, tocar una bandera movería el panel en
+      // vez de cambiar el idioma.
+      btn.addEventListener("pointerdown", (e) => e.stopPropagation());
+    });
+    langEsBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleSetLang("es");
+    });
+    langEnBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleSetLang("en");
+    });
 
     document.getElementById("gpm-course-select").addEventListener("change", handleCourseChange);
     document.getElementById("gpm-course-add").addEventListener("click", handleAddCourse);
@@ -1174,9 +1233,11 @@
     document.getElementById("gpm-export-json").addEventListener("click", handleExportJson);
     document.getElementById("gpm-import-json").addEventListener("click", handleImportJsonClick);
     document.getElementById("gpm-import-file").addEventListener("change", handleImportJsonFile);
-    document.getElementById("gpm-coffee").addEventListener("click", () => {
-      chrome.runtime.sendMessage({ type: "OPEN_EXTERNAL_LINK", url: COFFEE_LINK });
-    });
+    if (SHOW_DONATE_SECTION) {
+      document.getElementById("gpm-coffee")?.addEventListener("click", () => {
+        chrome.runtime.sendMessage({ type: "OPEN_EXTERNAL_LINK", url: COFFEE_LINK });
+      });
+    }
 
     renderCourseSelect();
     renderTeams();

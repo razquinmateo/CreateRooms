@@ -100,11 +100,13 @@ la lista de equipos) el docente puede:
 
 ### 5. Cambiar el idioma del panel
 
-El botón **🌐** en el header del panel alterna entre español e inglés. La
-primera vez que se abre el panel, el idioma se detecta automáticamente a
-partir del idioma del navegador (`navigator.language`); si el docente lo
-cambia a mano, esa elección queda guardada (clave `gpm_idioma`) y se respeta
-en adelante, sin volver a autodetectar.
+Arriba a la derecha del header hay dos banderitas (🇪🇸 español / 🇺🇸 inglés,
+dibujadas como SVG inline, sin archivos de imagen). La activa se ve resaltada;
+tocando la otra se cambia el idioma. La primera vez que se abre el panel, el
+idioma arranca detectado automáticamente a partir del idioma del navegador
+(`navigator.language`); en cuanto el docente toca una bandera a mano, esa
+elección queda guardada (clave `gpm_idioma`) y se respeta en adelante, sin
+volver a autodetectar.
 
 Todo lo que ve el docente (botones, mensajes de estado, el cheat sheet, los
 modales de confirmación) pasa por este sistema. Los `console.log` /
@@ -258,9 +260,14 @@ equipos como al detectar quién está presente para reaplicarlos.
   `_locales/<idioma>/messages.json` separados del código y sigue el idioma
   configurado en el navegador sin dar lugar a un toggle manual fácil. Acá se
   prefirió un objeto `STRINGS = { es: {...}, en: {...} }` con una función
-  `t(clave, ...args)` en el mismo `content.js`: permite el botón 🌐 de
-  cambio manual además de la detección automática, y no fragmenta los textos
-  en archivos aparte dado que el proyecto no tiene build step.
+  `t(clave, ...args)` en el mismo `content.js`: permite las dos banderitas
+  de cambio manual en el header además de la detección automática, y no
+  fragmenta los textos en archivos aparte dado que el proyecto no tiene
+  build step.
+- **Las banderas son SVG inline, no archivos de imagen.** A 20px de ancho
+  una imagen real no aporta detalle extra, y como SVG evitan tener que
+  declarar `web_accessible_resources` en el manifest o depender de que un
+  archivo cargue bien dentro del content script.
 - **El progreso y el detalle de la última distribución viven en el panel**,
   no sólo en la consola (F12) — la mayoría de los docentes no abre
   DevTools. La consola sigue recibiendo los mismos logs, por si sirven para
