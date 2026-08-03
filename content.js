@@ -1573,7 +1573,28 @@
     }
 
     simulateClick(suggestion);
-    await sleep(200);
+    await sleep(300);
+
+    // Verificamos que el click sobre la sugerencia se haya traducido en una
+    // asignación real, releyendo quién hay en la sala. Sin esto, un click
+    // que no "prendió" en la UI de Meet (lag, pérdida de foco, etc.) se
+    // reportaba igual como asignado en el cheat sheet, sin que el docente
+    // se enterara hasta abrir las salas.
+    const normParticipant = normalizeName(participantName);
+    let enSala = getRoomMemberNames(roomBlock).some((nombre) => normalizeName(nombre) === normParticipant);
+
+    if (!enSala) {
+      // Un solo reintento pasivo: a veces Meet tarda un poco más en
+      // reflejar el cambio en el DOM que en confirmar el click.
+      await sleep(400);
+      enSala = getRoomMemberNames(roomBlock).some((nombre) => normalizeName(nombre) === normParticipant);
+    }
+
+    if (!enSala) {
+      throw new Error(
+        `Hice click en la sugerencia de "${participantName}" pero no quedó confirmado dentro de la sala.`
+      );
+    }
   }
 
   async function runAutomation() {

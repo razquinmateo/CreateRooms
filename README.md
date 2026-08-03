@@ -61,6 +61,12 @@ clic.
      a ninguno de los dos automáticamente (no hay forma confiable de saber
      cuál es cuál por nombre) — los deja pendientes para que el docente los
      arrastre a mano.
+   - Después de cada click sobre la sugerencia de un alumno, **relee la
+     sala para confirmar que el alumno quedó realmente adentro** (no
+     confirma con sólo haber podido hacer el click); si no lo encuentra,
+     espera un instante más y vuelve a chequear una sola vez antes de
+     darlo por fallido, para no confiar ciegamente en un click que pudo no
+     haber "prendido" en la UI de Meet.
    - Al terminar, pinta un **detalle desplegable en el panel** ("📋 Detalle
      de la última distribución") con quién quedó asignado en cada sala,
      quién falló, quién quedó pendiente por nombre duplicado y quién no
@@ -182,6 +188,12 @@ para el botón "↩️ Deshacer última sobrescritura".
 Clave `gpm_panel_position`: recuerda dónde quedó posicionado el panel
 (se puede arrastrar tomándolo del header) para no reacomodarlo cada reunión.
 
+Clave `gpm_panel_colapsado`: recuerda si el docente dejó el panel colapsado
+(tocando el header sin arrastrar, alterna entre colapsado/expandido) para
+que no vuelva a abrirse solo en cada clase. El panel arranca expandido la
+primera vez. Cuando está colapsado sigue existiendo un botón flotante
+**"Grupos Meet"** (`#gpm-reopen-btn`) para volver a mostrarlo.
+
 Clave `gpm_idioma`: `"es"` o `"en"`. Sólo existe después de que el docente
 toca el botón 🌐 por primera vez — hasta entonces, el idioma se detecta desde
 `navigator.language` en cada carga sin persistirlo, para no "pisar" con un
@@ -246,6 +258,15 @@ equipos como al detectar quién está presente para reaplicarlos.
   reporta error puntual para ese equipo.
 - **La reasignación automática nunca adivina ante nombres duplicados.** Si
   hay ambigüedad, prefiere no asignar antes que asignar mal.
+- **Cada asignación se verifica releyendo la sala, no sólo confiando en el
+  click.** `assignParticipantToRoom` no da por buena una asignación con
+  sólo haber podido clickear la sugerencia del autocompletado: después del
+  click vuelve a llamar a `getRoomMemberNames` sobre esa sala y chequea que
+  el alumno aparezca ahí. Si no aparece, espera un instante más y reintenta
+  la lectura una única vez (sin volver a clickear) antes de tirar error —
+  cubre el caso de que el click no haya "prendido" en la UI de Meet (lag,
+  pérdida de foco) y evita que el cheat sheet reporte ✅ asignado cuando en
+  realidad el alumno quedó sin sala.
 - **Nunca hace clic en "Abrir salas" automáticamente.** El docente siempre
   tiene el control final.
 - **Los diálogos de confirmación son un modal propio** (`showConfirm()` en
@@ -287,6 +308,11 @@ equipos como al detectar quién está presente para reaplicarlos.
   cambiar: un link de `paypal.com/myaccount/...` (panel privado de la
   cuenta) NO sirve para esto, tiene que ser un link público de cobro tipo
   `paypal.me/usuario`.
+  - **Actualmente desactivada**: la constante `SHOW_DONATE_SECTION` en
+    `content.js` está en `false` (se apagó a propósito para la prueba con
+    el profesor invitado a testear). Con `false`, ni la sección ni el botón
+    se renderizan en el panel. Poner esa constante en `true` para
+    reactivarla.
 
 ## Limitaciones conocidas
 
@@ -301,15 +327,9 @@ equipos como al detectar quién está presente para reaplicarlos.
 
 ## Mejoras pendientes (roadmap)
 
-Ideas ya evaluadas y priorizadas, pendientes de implementar:
-
-- **Verificar que la asignación se aplicó de verdad**: hoy
-  `assignParticipantToRoom` confía en que el click sobre la sugerencia
-  funcionó; no vuelve a leer la sala con `getRoomMemberNames` para
-  confirmarlo. Sería el cambio de mayor impacto de los pendientes de
-  confiabilidad.
-- **Setear automáticamente la cantidad de salas** en el input "Salas" del
-  panel nativo de Meet, en vez de sólo avisar "creá al menos N".
+Por ahora no hay mejoras evaluadas pendientes de implementar. La última
+pendiente (verificar que la asignación se aplicó de verdad) ya se implementó
+— ver "Decisiones de diseño relevantes" más arriba.
 
 ## Para retomar el desarrollo desde otro chat
 
